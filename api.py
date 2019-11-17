@@ -22,6 +22,7 @@ async def index(req, resp):
     face_locations = get_face_locations(img_path)
     faces = extract_faces(face_locations, img_path)
     filtered_faces = gaussian_blur(faces)
+
     blur_img = embed_filtered_faces(img_path, filtered_faces, face_locations)
 
     buffered = BytesIO()
@@ -29,6 +30,7 @@ async def index(req, resp):
     img_base64 = base64.b64encode(buffered.getvalue())
 
     img_utf_8 = img_base64.decode("utf-8")
+
     if len(face_locations) == 0:
         resp.media = {"image": img_utf_8, 'name': name, "status": "No detection"}
     else:
@@ -37,7 +39,7 @@ async def index(req, resp):
 
 def get_face_locations(img_path):
     image = face_recognition.load_image_file(img_path)
-    face_locations = face_recognition.face_locations(image, model='cnn')
+    face_locations = face_recognition.face_locations(image)
     return face_locations
 
 
