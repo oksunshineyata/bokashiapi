@@ -37,9 +37,41 @@ async def index(req, resp):
         resp.media = {"image": img_utf_8, 'name': name}
 
 
-def get_face_locations(img_path):
+@api.route("/cnn")
+async def index(req, resp):
+
+    data = await req.media()
+    binary = data['image']
+    name = data['name']
+    img = base64.b64decode(binary)
+    with open(img_path, 'wb') as f:
+        f.write(img)
+
+    # face_recognition
+    face_locations = get_face_locations(img_path, 'cnn')
+    faces = extract_faces(face_locations, img_path)
+    filtered_faces = gaussian_blur(faces)
+
+    blur_img = embed_filtered_faces(img_path, filtered_faces, face_locations)
+
+    buffered = BytesIO()
+    blur_img.save(buffered, format="JPEG")
+    img_base64 = base64.b64encode(buffered.getvalue())
+
+    img_utf_8 = img_base64.decode("utf-8")
+
+    if len(face_locations) == 0:
+        resp.media = {"image": img_utf_8, 'name': name, "status": "No detection"}
+    else:
+        resp.media = {"image": img_utf_8, 'name': name}
+
+
+def get_face_locations(img_path, model=None):
     image = face_recognition.load_image_file(img_path)
-    face_locations = face_recognition.face_locations(image)
+    if model is not None:
+        face_locations = face_recognition.face_locations(image, model='cnn')
+    else:
+        face_locations = face_recognition.face_locations(image)
     return face_locations
 
 
