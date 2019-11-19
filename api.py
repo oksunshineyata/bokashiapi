@@ -89,7 +89,7 @@ def extract_faces(face_locations, img_path):
 def gaussian_blur(faces):
     filtered_faces = []
     for face in faces:
-        filtered_face = face.filter(ImageFilter.GaussianBlur(4.0))
+        filtered_face = face.filter(ImageFilter.GaussianBlur(10.0))
         filtered_faces.append(filtered_face)
 
     return filtered_faces
