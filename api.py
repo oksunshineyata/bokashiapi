@@ -21,12 +21,12 @@ async def index(req, resp):
     # face_recognition
     face_locations = get_face_locations(img_path)
     faces = extract_faces(face_locations, img_path)
-    filtered_faces = gaussian_blur(faces)
+    filtered_faces = mosaic(faces)
 
-    blur_img = embed_filtered_faces(img_path, filtered_faces, face_locations)
+    mosaic_img = embed_filtered_faces(img_path, filtered_faces, face_locations)
 
     buffered = BytesIO()
-    blur_img.save(buffered, format="JPEG")
+    mosaic_img.save(buffered, format="JPEG")
     img_base64 = base64.b64encode(buffered.getvalue())
 
     img_utf_8 = img_base64.decode("utf-8")
@@ -38,7 +38,7 @@ async def index(req, resp):
 
 
 @api.route("/cnn")
-async def index(req, resp):
+async def cnn(req, resp):
 
     data = await req.media()
     binary = data['image']
@@ -104,6 +104,15 @@ def embed_filtered_faces(img_path, filtered_faces, face_locations):
         img.paste(face, (left, top))
 
     return img
+
+
+def mosaic(faces):
+    mosaics = []
+    for face in faces:
+        mosaic_face = face.resize([x // 8 for x in face.size]).resize(face.size)
+        mosaics.append(mosaic_face)
+
+    return mosaics
 
 
 if __name__ == '__main__':
